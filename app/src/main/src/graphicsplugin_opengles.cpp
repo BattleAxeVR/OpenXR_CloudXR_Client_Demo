@@ -88,7 +88,9 @@ struct OpenGLESGraphicsPlugin : public IGraphicsPlugin {
         auto swapchainFormatIt =
             std::find_first_of(runtimeFormats.begin(), runtimeFormats.end(), std::begin(SupportedColorSwapchainFormats),
                                std::end(SupportedColorSwapchainFormats));
-        if (swapchainFormatIt == runtimeFormats.end()) {
+
+        if (swapchainFormatIt == runtimeFormats.end())
+        {
             THROW("No runtime swapchain format supported for color swapchain");
         }
 

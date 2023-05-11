@@ -652,27 +652,36 @@ struct OpenXrProgram : IOpenXrProgram {
         m_views.resize(viewCount, {XR_TYPE_VIEW});
 
         // Create the swapchain and get the images.
-        if (viewCount > 0) {
+        if (viewCount > 0)
+        {
             // Select a swapchain format.
             uint32_t swapchainFormatCount;
             CHECK_XRCMD(xrEnumerateSwapchainFormats(m_session, 0, &swapchainFormatCount, nullptr));
             std::vector<int64_t> swapchainFormats(swapchainFormatCount);
+
             CHECK_XRCMD(xrEnumerateSwapchainFormats(m_session, (uint32_t)swapchainFormats.size(), &swapchainFormatCount,
                                                     swapchainFormats.data()));
+
             CHECK(swapchainFormatCount == swapchainFormats.size());
             m_colorSwapchainFormat = m_graphicsPlugin->SelectColorSwapchainFormat(swapchainFormats);
 
             // Print swapchain formats and the selected one.
             {
                 std::string swapchainFormatsString;
-                for (int64_t format : swapchainFormats) {
+
+                for (int64_t format : swapchainFormats)
+                {
                     const bool selected = format == m_colorSwapchainFormat;
                     swapchainFormatsString += " ";
-                    if (selected) {
+
+                    if (selected)
+                    {
                         swapchainFormatsString += "[";
                     }
                     swapchainFormatsString += std::to_string(format);
-                    if (selected) {
+
+                    if (selected)
+                    {
                         swapchainFormatsString += "]";
                     }
                 }
@@ -680,8 +689,10 @@ struct OpenXrProgram : IOpenXrProgram {
             }
 
             // Create a swapchain for each view.
-            for (uint32_t i = 0; i < viewCount; i++) {
+            for (uint32_t i = 0; i < viewCount; i++)
+            {
                 const XrViewConfigurationView& vp = m_configViews[i];
+
                 Log::Write(Log::Level::Info,
                            Fmt("Creating swapchain for view %d with dimensions Width=%d Height=%d SampleCount=%d", i,
                                vp.recommendedImageRectWidth, vp.recommendedImageRectHeight, vp.recommendedSwapchainSampleCount));
@@ -696,6 +707,7 @@ struct OpenXrProgram : IOpenXrProgram {
                 swapchainCreateInfo.faceCount = 1;
                 swapchainCreateInfo.sampleCount = m_graphicsPlugin->GetSupportedSwapchainSampleCount(vp);
                 swapchainCreateInfo.usageFlags = XR_SWAPCHAIN_USAGE_SAMPLED_BIT | XR_SWAPCHAIN_USAGE_COLOR_ATTACHMENT_BIT;
+
                 Swapchain swapchain;
                 swapchain.width = swapchainCreateInfo.width;
                 swapchain.height = swapchainCreateInfo.height;
@@ -1100,10 +1112,12 @@ struct OpenXrProgram : IOpenXrProgram {
         }
 
         // Render view to the appropriate part of the swapchain image.
-        for (uint32_t i = 0; i < viewCountOutput; i++) {
+        for (uint32_t i = 0; i < viewCountOutput; i++)
+        {
             // Each view has a separate swapchain which is acquired, rendered to, and released.
             const Swapchain viewSwapchain = m_swapchains[i];
             XrSwapchainImageAcquireInfo acquireInfo{XR_TYPE_SWAPCHAIN_IMAGE_ACQUIRE_INFO};
+
             uint32_t swapchainImageIndex;
             CHECK_XRCMD(xrAcquireSwapchainImage(viewSwapchain.handle, &acquireInfo, &swapchainImageIndex));
 
@@ -1119,8 +1133,11 @@ struct OpenXrProgram : IOpenXrProgram {
             projectionLayerViews[i].subImage.imageRect.extent = {viewSwapchain.width, viewSwapchain.height};
 
             const XrSwapchainImageBaseHeader* const swapchainImage = m_swapchainImages[viewSwapchain.handle][swapchainImageIndex];
+
             const uint32_t colorTexture = reinterpret_cast<const XrSwapchainImageOpenGLESKHR*>(swapchainImage)->image;
-            if (m_cloudxr->SetupFramebuffer(colorTexture, i, projectionLayerViews[i].subImage.imageRect.extent.width, projectionLayerViews[i].subImage.imageRect.extent.height)) {
+
+            if (m_cloudxr->SetupFramebuffer(colorTexture, i, projectionLayerViews[i].subImage.imageRect.extent.width, projectionLayerViews[i].subImage.imageRect.extent.height))
+            {
                 cxrVideoFrame &videoFrame = framesLatched.frames[i];
                 m_cloudxr->BlitFrame(&framesLatched, framevaild, i);
             }

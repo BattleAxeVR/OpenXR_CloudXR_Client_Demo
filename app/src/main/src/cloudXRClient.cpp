@@ -154,21 +154,28 @@ void CloudXRClient::GetTrackingState(cxrVRTrackingState *trackingState) {
 }
 
 bool CloudXRClient::SetupFramebuffer(GLuint colorTexture, uint32_t eye, uint32_t width, uint32_t height) {
-    if (mFramebuffers[eye] == 0) {
+
+    if (mFramebuffers[eye] == 0)
+    {
         GLuint framebuffer;
         glGenFramebuffers(1, &framebuffer);
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer);
         glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorTexture, 0);
+
         GLenum status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
+
         if (status != GL_FRAMEBUFFER_COMPLETE) {
             Log::Write(Log::Level::Error, Fmt("Incomplete frame buffer object, status:0x%x", status));
             return false;
         }
+
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
         mFramebuffers[eye] = framebuffer;
         Log::Write(Log::Level::Info, Fmt("Created FBO %d for eye%d texture %d.", framebuffer, eye, colorTexture));
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mFramebuffers[eye]);
-    } else {
+    }
+    else
+    {
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mFramebuffers[eye]);
         glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorTexture, 0);
     }
