@@ -8,12 +8,16 @@
 #include <sstream>
 
 #if defined(ANDROID)
-#define ALOGE(...) __android_log_print(ANDROID_LOG_ERROR, "hello_xr", __VA_ARGS__)
-#define ALOGV(...) __android_log_print(ANDROID_LOG_VERBOSE, "hello_xr", __VA_ARGS__)
+#define LOG_TAG "hello_xr"
+#define ALOGV(...) __android_log_print(ANDROID_LOG_VERBOSE, LOG_TAG, __VA_ARGS__)
+#define ALOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
+#define ALOGD(...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
+#define ALOGW(...) __android_log_print(ANDROID_LOG_WARN, LOG_TAG, __VA_ARGS__)
+#define ALOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 #endif
 
 namespace {
-Log::Level g_minSeverity{Log::Level::Info};
+Log::Level g_minSeverity{Log::Level::Verbose};
 std::mutex g_logLock;
 }  // namespace
 
@@ -21,6 +25,7 @@ namespace Log {
 void SetLevel(Level minSeverity) { g_minSeverity = minSeverity; }
 
 void Write(Level severity, const std::string& msg) {
+
     if (severity < g_minSeverity) {
         return;
     }
@@ -37,8 +42,14 @@ void Write(Level severity, const std::string& msg) {
     const auto secondRemainder = now - std::chrono::system_clock::from_time_t(now_time);
     const int64_t milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(secondRemainder).count();
 
-    static std::map<Level, const char*> severityName = {
-        {Level::Verbose, "Verbose"}, {Level::Info, "Info   "}, {Level::Warning, "Warning"}, {Level::Error, "Error  "}};
+    static std::map<Level, const char*> severityName =
+    {
+        {Level::Verbose, "Verbose"},
+        {Level::Info, "Info"},
+        {Level::Debug, "Debug"},
+        {Level::Warning, "Warning"},
+        {Level::Error, "Error"}
+    };
 
     std::ostringstream out;
     out.fill('0');
@@ -48,14 +59,33 @@ void Write(Level severity, const std::string& msg) {
 
     std::lock_guard<std::mutex> lock(g_logLock);  // Ensure output is serialized
     ((severity == Level::Error) ? std::clog : std::cout) << out.str();
+
+    const char* message = out.str().c_str();
+
 #if defined(_WIN32)
-    OutputDebugStringA(out.str().c_str());
+    OutputDebugStringA(message);
 #endif
 #if defined(ANDROID)
-    if (severity == Level::Error)
-        ALOGE("%s", out.str().c_str());
-    else
-        ALOGV("%s", out.str().c_str());
+    switch (severity)
+    {
+        case Level::Verbose:
+            ALOGV("%s", message);
+            break;
+        case Level::Info:
+            ALOGI("%s", message);
+            break;
+        case Level::Debug:
+            ALOGD("%s", message);
+            break;
+        case Level::Warning:
+            ALOGW("%s", message);
+            break;
+        case Level::Error:
+            ALOGE("%s", message);
+            break;
+        default:
+            break;
+    }
 #endif
 }
 }  // namespace Log
