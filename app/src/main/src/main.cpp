@@ -169,6 +169,8 @@ void android_main(struct android_app* app) {
         program->CreateSwapchains();
         program->StartCloudxrClient();
 
+        Log::Write(Log::Level::Info, "BK: Main Loop");
+
         while (app->destroyRequested == 0) {
             // Read all pending events.
             for (;;) {
@@ -187,6 +189,8 @@ void android_main(struct android_app* app) {
                 }
             }
 
+            //Log::Write(Log::Level::Info, "BK: PollEvents");
+
             program->PollEvents(&exitRenderLoop, &requestRestart);
 
             if (exitRenderLoop && !requestRestart) {
@@ -199,7 +203,10 @@ void android_main(struct android_app* app) {
                 continue;
             }
 
+            //Log::Write(Log::Level::Info, "BK: PollActions");
             program->PollActions();
+
+            //Log::Write(Log::Level::Info, "BK: RenderFrame");
             program->RenderFrame();
         }
         app->activity->vm->DetachCurrentThread();
@@ -212,4 +219,6 @@ void android_main(struct android_app* app) {
     {
         Log::Write(Log::Level::Error, "Unknown Error");
     }
+
+    Log::Write(Log::Level::Info, "BK: End app");
 }

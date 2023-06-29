@@ -15,6 +15,8 @@
 #include <math.h>
 #include "cloudXRClient.h"
 
+#define LOG_MATRICES 0
+
 namespace {
 
 #if !defined(XR_USE_PLATFORM_WIN32)
@@ -1028,8 +1030,11 @@ struct OpenXrProgram : IOpenXrProgram {
         std::vector<XrCompositionLayerBaseHeader*> layers;
         XrCompositionLayerProjection layer{XR_TYPE_COMPOSITION_LAYER_PROJECTION};
         std::vector<XrCompositionLayerProjectionView> projectionLayerViews;
-        if (frameState.shouldRender == XR_TRUE) {
+        if (frameState.shouldRender == XR_TRUE)
+        {
             if (RenderLayer(frameState.predictedDisplayTime, projectionLayerViews, layer)) {
+
+                //Log::Write(Log::Level::Info, "BK: RenderFrame ADDING LAYER");
                 layers.push_back(reinterpret_cast<XrCompositionLayerBaseHeader*>(&layer));
             }
         }
@@ -1132,6 +1137,36 @@ struct OpenXrProgram : IOpenXrProgram {
             projectionLayerViews[i].subImage.imageRect.offset = {0, 0};
             projectionLayerViews[i].subImage.imageRect.extent = {viewSwapchain.width, viewSwapchain.height};
 
+#if LOG_MATRICES
+            static bool log_projection_matrices = true;
+
+            if (log_projection_matrices)
+            {
+                const float tanLeft = tanf(m_views[i].fov.angleLeft);
+                const float tanRight = tanf(m_views[i].fov.angleRight);
+
+                const float tanDown = tanf(m_views[i].fov.angleDown);
+                const float tanUp = tanf(m_views[i].fov.angleUp);
+
+                const std::string side_prefix = (i == Side::LEFT) ? "REMOTE LEFT " : "REMOTE RIGHT ";
+
+                Log::Write(Log::Level::Info, side_prefix + Fmt("FOV angleLeft = %.7f (tan = %.7f)", m_views[i].fov.angleLeft, tanLeft));
+                Log::Write(Log::Level::Info, side_prefix + Fmt("FOV angleRight = %.7f (tan = %.7f)", m_views[i].fov.angleRight, tanRight));
+                Log::Write(Log::Level::Info, side_prefix + Fmt("FOV angleDown = %.7f (tan = %.7f)", m_views[i].fov.angleDown, tanDown));
+                Log::Write(Log::Level::Info, side_prefix + Fmt("FOV angleUp = %.7f (tan = %.7f)", m_views[i].fov.angleUp, tanUp));
+
+                Log::Write(Log::Level::Info, side_prefix + " Projection matrix:");
+
+                XrMatrix4x4f proj;
+                XrMatrix4x4f_CreateProjectionFov(&proj, GRAPHICS_OPENGL_ES, m_views[i].fov, 0.05f, 100.0f);
+
+                Log::Write(Log::Level::Info, Fmt("%.7f\t%.7f\t%.7f\t%.7f", proj.m[0], proj.m[4], proj.m[8], proj.m[12]));
+                Log::Write(Log::Level::Info, Fmt("%.7f\t%.7f\t%.7f\t%.7f", proj.m[1], proj.m[5], proj.m[9], proj.m[13]));
+                Log::Write(Log::Level::Info, Fmt("%.7f\t%.7f\t%.7f\t%.7f", proj.m[2], proj.m[6], proj.m[10], proj.m[14]));
+                Log::Write(Log::Level::Info, Fmt("%.7f\t%.7f\t%.7f\t%.7f", proj.m[3], proj.m[7], proj.m[11], proj.m[15]));
+            }
+#endif
+
             const XrSwapchainImageBaseHeader* const swapchainImage = m_swapchainImages[viewSwapchain.handle][swapchainImageIndex];
 
             const uint32_t colorTexture = reinterpret_cast<const XrSwapchainImageOpenGLESKHR*>(swapchainImage)->image;
@@ -1161,6 +1196,7 @@ struct OpenXrProgram : IOpenXrProgram {
 
 
     bool CreateCloudxrClient() override {
+        Log::Write(Log::Level::Info, "BK: CreateCloudxrClient");
         m_cloudxr = std::make_shared<CloudXRClient>();
         return true;
     }
@@ -1172,6 +1208,9 @@ struct OpenXrProgram : IOpenXrProgram {
     }
 
     void StartCloudxrClient() override {
+
+        Log::Write(Log::Level::Info, "BK: StartCloudxrClient");
+
         if (m_cloudxr.get()) {
             m_cloudxr->Initialize(m_instance, m_systemId, m_session, m_displayRefreshRate, m_isSupport_epic_view_configuration_fov_extention, (void*)this, [](void *arg, int controllerIdx, float amplitude, float seconds, float frequency) {
                 Log::Write(Log::Level::Error, Fmt("this:%p, index:%d, amplitude:%f, seconds:%f, frequency:%f", arg, controllerIdx, amplitude, seconds, frequency));

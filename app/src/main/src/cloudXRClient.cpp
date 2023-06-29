@@ -37,7 +37,7 @@ void CloudXRClient::Initialize(XrInstance instance, XrSystemId systemId, XrSessi
     m_callbackArg = arg;
     m_traggerHapticCallback = traggerHaptic;
 
-    Log::Write(Log::Level::Info, Fmt("CloudXRClient::Initialize......"));
+    Log::Write(Log::Level::Info, Fmt("BK: CloudXRClient::Initialize......"));
 
     Log::Write(Log::Level::Info, Fmt("ipd:%f", mIPD));
 
@@ -125,6 +125,9 @@ void CloudXRClient::SetSenserPoseState(XrPosef& pose, XrVector3f& linearVelocity
         hand.position.y += offsetHeight;
     }
     mIPD = ipd;
+
+    const float IPD_in_mm = mIPD * 1000.0f;
+    Log::Write(Log::Level::Info, Fmt("IPD (mm) = %.7f", IPD_in_mm));
 }
 
 void CloudXRClient::SetTrackingState(cxrVRTrackingState &trackingState) {
@@ -147,7 +150,7 @@ void CloudXRClient::GetTrackingState(cxrVRTrackingState *trackingState) {
 
     mTrackingState.hmd.pose = ConvertPose(mHeadPose);
     mTrackingState.hmd.pose.poseIsValid = cxrTrue;
-    mTrackingState.hmd.pose.deviceIsConnected = cxrTrue ;
+    mTrackingState.hmd.pose.deviceIsConnected = cxrTrue;
     mTrackingState.hmd.pose.trackingResult = cxrTrackingResult_Running_OK;
 
     *trackingState = mTrackingState;
@@ -315,7 +318,8 @@ bool CloudXRClient::CreateReceiver() {
     desc.numStreams = 2;
     desc.receiverMode = cxrStreamingMode_XR;
     desc.debugFlags = s_options.mDebugFlags;
-    desc.debugFlags |= cxrDebugFlags_EnableAImageReaderDecoder + cxrDebugFlags_LogVerbose + cxrDebugFlags_OutputLinearRGBColor;
+    //desc.debugFlags |= cxrDebugFlags_EnableAImageReaderDecoder + cxrDebugFlags_LogVerbose + cxrDebugFlags_OutputLinearRGBColor;
+    desc.debugFlags |= cxrDebugFlags_LogVerbose + cxrDebugFlags_OutputLinearRGBColor;
     desc.logMaxSizeKB = CLOUDXR_LOG_MAX_DEFAULT;
     desc.logMaxAgeDays = CLOUDXR_LOG_MAX_DEFAULT;
 
