@@ -1,10 +1,10 @@
 # OpenXR CloudXR Client Demo
 - **This software contains source code provided by NVIDIA Corporation**.
 - The client decodes and renders content that is streamed from the CloudXR server and collects motion and controller data from the VR headset that is sent to the CloudXR server.The VR headset must be capable of decoding 4k HEVC video @ 60fps. The provided sample client has been tested with the Pico Neo3, Pico4, Pico4 Pro and Pico4 Enterprise.
-- If you have any questions/comments, please visit [**Pico Developer Support Portal**](https://picodevsupport.freshdesk.com/support/home) and raise your question there.
+- If you have any questions/comments, please visit [**Pico Developer community**](https://developer-cn.pico-interactive.com/community) and raise your question there.
 
 ## Feature
-- The Project integrates with [CloudXR v3.2](https://developer.nvidia.com/nvidia-cloudxr-sdk-get-started) using [PICO OpenXR  SDK v2.1.0](https://developer-global.pico-interactive.com/sdk?deviceId=1&platformId=3&itemId=11).
+- The Project integrates with [CloudXR v3.2](https://developer.nvidia.com/nvidia-cloudxr-sdk-get-started) using [PICO OpenXR  SDK v2.2.0](https://developer-global.pico-interactive.com/sdk?deviceId=1&platformId=3&itemId=11).
 
 ## Pico OpenXR CloudXR Client Prerequisites
 ### Required
@@ -26,7 +26,7 @@ For developers who want to modify, build, and debug the client application, a co
 >  - To use the bundled OpenJDK, click File -> Project Structure in the menu bar. In the SDK Location page under JDK Location, select the Use embedded JDK checkbox, and then click OK.
 >  - The NDK version was selected because it was the LTS release at the time of development and is aligned with Android Studio 4.0.x as the default NDK version.
 >  - Newer NDK versions, such as 23.x, might cause build issues.
->  - As of the CloudXR 3.1 release, only Android 64-bit builds are supported.
+>  - As of the CloudXR 3.2 release, only Android 64-bit builds are supported.
   
 
 You also need:
